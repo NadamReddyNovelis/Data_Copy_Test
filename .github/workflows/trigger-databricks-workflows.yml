@@ -66,8 +66,8 @@ jobs:
 
       - name: Run Python Script Inline
         run: |
-          from_env = "${{ github.event.inputs.from_env }}"
-          to_env = "${{ github.event.inputs.to_env }}"
+          from_env = "${{ env.FROM_ENV }}"
+          to_env = "${{ env.TO_ENV }}"
 
           print(f"from_env: {from_env}, to_env: {to_env}")
 
