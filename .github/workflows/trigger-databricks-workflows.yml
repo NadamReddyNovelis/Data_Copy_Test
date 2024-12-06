@@ -62,11 +62,11 @@ jobs:
         run: |
           echo "Validating input parameters..."
 
-          accepted_op_types=("CLONE" "CREATE" "CLONE-CREATE")
+          accepted_op_types=("CLONE" "CREATE")
           accepted_env=("PROD" "QA" "PREPROD" "DEV" "SIT")
           
           if ! [[ "${accepted_op_types[@]}" =~ "${{ env.OPERATION_TYPE }}" ]]; then
-            echo "Invalid OPERATION_TYPE: ${{ env.OPERATION_TYPE }}. Must be one of: CLONE, CREATE, CLONE-CREATE."
+            echo "Invalid OPERATION_TYPE: ${{ env.OPERATION_TYPE }}. Must be one of: CLONE, CREATE"
             exit 1
           fi
 
@@ -113,7 +113,11 @@ jobs:
             --arg operation_type "${{ env.OPERATION_TYPE }}" \
             '{SYSTEM: $system, REGION: $region, PLANT: $plant, "COMMA SEPERATED TABLES LIST": $tables_list, INGESTION_LAYER: $ingestion_layer, FROM_ENV: $from_env, TO_ENV: $to_env, OPERATION_TYPE: $operation_type}')
           echo "NOTEBOOK_PARAMS=$NOTEBOOK_PARAMS" >> $GITHUB_ENV
-
+          
+      - name: Checkout-branch-check
+        run: |
+          echo "${{ github.head_ref || github.ref }}"
+          
       - name: Checkout code
         uses: actions/checkout@v3
         with:
@@ -122,7 +126,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - name: Install Required Packages
         run: |
