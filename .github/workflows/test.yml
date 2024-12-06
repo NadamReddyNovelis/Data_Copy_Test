@@ -14,7 +14,7 @@ env:
 jobs:
   Test_JOB:
     env:
-      FROM_ENV: ${{ env.FROM_ENV }}
+      FROM_ENV: ${{ github.event.inputs.FROM_ENV }}
     environment: Data-Copy_OPS-${{ env.FROM_ENV }}
     runs-on: ubuntu-latest
     steps:
