@@ -141,7 +141,7 @@ jobs:
           pip install -r requirements.txt
           
       - name: Trigger Databricks Workflow
-        shell: python
+        # shell: python
         env:
           WORKSPACE_INSTANCE: ${{ secrets[env.WORKSPACE_INSTANCE] }}
           WORKSPACE_TOKEN: ${{ secrets[env.WORKSPACE_TOKEN] }}
