@@ -19,7 +19,10 @@ try:
         pass
     else:
         raise Exception(f'{type(params)} - is not valid for notebook params')
-except json.JSONDecodeError as e, Exception as e:
+except json.JSONDecodeError as e:
+    print(f"Invalid format for a JSON Object: {e}")
+        raise
+except Exception as e:
     print(f"Invalid format for notebook params: {e}")
         raise
 
