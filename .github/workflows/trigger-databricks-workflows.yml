@@ -58,26 +58,37 @@ jobs:
     needs: Debug-Input-Params
     runs-on: ubuntu-latest
     steps:
-      - name: Validate Inputs
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+
+      - name: Run Python Script Inline
         run: |
-          echo "Validating input parameters..."
+          from_env = "${{ github.event.inputs.from_env }}"
+          to_env = "${{ github.event.inputs.to_env }}"
 
-          accepted_op_types=("CLONE" "CREATE")
-          accepted_env=("PROD" "QA" "PREPROD" "DEV" "SIT")
-          
-          if ! [[ "${accepted_op_types[@]}" =~ "${{ env.OPERATION_TYPE }}" ]]; then
-            echo "Invalid OPERATION_TYPE: ${{ env.OPERATION_TYPE }}. Must be one of: CLONE, CREATE"
-            exit 1
-          fi
+          print(f"from_env: {from_env}, to_env: {to_env}")
 
-          if ! [[ "${accepted_env[@]}" =~ "${{ env.FROM_ENV }}" ]]; then
-            echo "Invalid TO_ENV: ${{ env.FROM_ENV }}"
-            exit 1
-          fi
-          if ! [[ "${accepted_env[@]}" =~ "${{ env.TO_ENV }}" ]]; then
-            echo "Invalid TO_ENV: ${{ env.TO_ENV }}"
-            exit 1
-          fi
+          env_hierarchy = [['PROD'], ['QA', 'PREPROD'], ['DEV', 'SIT']]
+          from_env_h, to_env_h = None, None
+
+          for idx, env_list in enumerate(env_hierarchy):
+              for env in env_list:
+                  if env == from_env:
+                      from_env_h = idx
+                  if env == to_env:
+                      to_env_h = idx
+                  if from_env_h is not None and to_env_h is not None: break
+          if from_env_h is None or to_env_h is None: 
+              print(f'From ENV - {from_env} and TO ENV - {to_env} should be among: {env_hierarchy}')
+              exit(1)
+          if from_env_h >= to_env_h:
+              print('FROM ENV cannot be a higher env than TO ENV')
+              exit(1)
+
+          print(f"Validation passed: {from_env} > {to_env}")
   
           
   Trigger-Workflow:
