@@ -80,8 +80,9 @@ jobs:
           fi
   
           
-  test_env:
-    environment: TEST_SECRET
+  Trigger-Workflow:
+    needs: Validate-Params
+    environment: Data-Copy_OPS
     runs-on: ubuntu-latest
     steps:
       - name: Prepare WORKSPACE-LEVEL Variables
@@ -98,14 +99,30 @@ jobs:
           echo "WORKSPACE_INSTANCE=${ENV_GROUP}_DATABRICKS_INSTANCE" >> $GITHUB_ENV
           echo "WORKSPACE_TOKEN=${ENV_GROUP}_DATABRICKS_TOKEN" >> $GITHUB_ENV
           echo "JOB_ID=${ENV_GROUP}_JOB_ID" >> $GITHUB_ENV
+      
+      - name: Prepare Notebook Params
+        run: |
+          NOTEBOOK_PARAMS=$(jq -n \
+            --arg system "${{ env.SYSTEM }}" \
+            --arg region "${{ env.REGION }}" \
+            --arg plant "${{ env.PLANT }}" \
+            --arg tables_list "${{ env.TABLES_LIST }}" \
+            --arg ingestion_layer "${{ env.INGESTION_LAYER }}" \
+            --arg from_env "${{ env.FROM_ENV }}" \
+            --arg to_env "${{ env.TO_ENV }}" \
+            --arg operation_type "${{ env.OPERATION_TYPE }}" \
+            '{SYSTEM: $system, REGION: $region, PLANT: $plant, TABLE_LIST: $table_list, INGESTION_LAYER: $ingestion_layer, FROM_ENV: $from_env, TO_ENV: $to_env, OPERATION_TYPE: $operation_type}')
+          echo "NOTEBOOK_PARAMS=$NOTEBOOK_PARAMS" >> $GITHUB_ENV
 
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
           
-      - name: Test env vars for python
-        run: python -c 'import os;print(os.environ)'
+      - name: Trigger Databricks Workflow
         env:
-          ENV_SECRET: ${{ secrets[env.WORKSPACE_INSTANCE] }} 
-          REPO_SECRET: ${{ secrets[env.WORKSPACE_TOKEN] }} 
+          WORKSPACE_INSTANCE: ${{ secrets[env.WORKSPACE_INSTANCE] }}
+          WORKSPACE_TOKEN: ${{ secrets[env.WORKSPACE_TOKEN] }}
+          JOB_ID: ${{ vars[env.JOB_ID] }}
+          NOTEBOOK_PARAMS: ${{ env.NOTEBOOK_PARAMS }}
+        run: databricks_workflow_trigger.py
