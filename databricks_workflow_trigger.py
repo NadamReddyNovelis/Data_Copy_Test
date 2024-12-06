@@ -1,8 +1,8 @@
 import os
 import json
-
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service import jobs
+
 
 def trigger_job_run_sdk(job_id, params):
     try:
@@ -16,6 +16,7 @@ def trigger_job_run_sdk(job_id, params):
         return {key: run_res.get(key) for key in ['run_id', 'run_page_url', 'state']}
     except Exception as e:
         raise Exception(f'Failed to trigger workflow run: {e}')
+
 
 if __name__ == '__main__':
     workspace_id = os.getenv("WORKSPACE_INSTANCE")
