@@ -102,7 +102,7 @@ jobs:
       
       - name: Prepare Notebook Params
         run: |
-          NOTEBOOK_PARAMS=$(jq -n \
+          NOTEBOOK_PARAMS=$(jq -c -n \
             --arg system "${{ env.SYSTEM }}" \
             --arg region "${{ env.REGION }}" \
             --arg plant "${{ env.PLANT }}" \
