@@ -1,0 +1,22 @@
+name: Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      TO_ENV:
+        description: "Target Environment"
+        required: true
+
+env:
+  FROM_ENV: ${{ github.head_ref || github.ref }}
+  TO_ENV: ${{ github.event.inputs.TO_ENV }}
+
+jobs:
+  Test_JOB:
+    environment: Data-Copy_OPS-${{ env.FROM_ENV }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test_Task
+        shell: python
+        run: |
+          print('This works!')
