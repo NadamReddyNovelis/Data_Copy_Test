@@ -11,6 +11,8 @@ job_id = os.getenv("JOB_ID")
 params = os.getenv("NOTEBOOK_PARAMS")
 
 print(workspace_id, api_token, job_id, params)
+print('_________________________________________________________________')
+print(type(workspace_id), type(api_token), type(job_id), type(params))
 
 def trigger_job_run_sdk(job_id, params):
     try:
