@@ -8,6 +8,7 @@ from databricks.sdk.service import jobs
 workspace_id = os.getenv("WORKSPACE_INSTANCE")
 api_token = os.getenv("WORKSPACE_TOKEN")
 job_id = os.getenv("JOB_ID")
+params = os.getenv("NOTEBOOK_PARAMS")
 
 def trigger_job_run_sdk(job_id, params):
     try:
