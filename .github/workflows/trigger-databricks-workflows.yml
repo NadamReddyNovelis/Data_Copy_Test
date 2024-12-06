@@ -125,4 +125,4 @@ jobs:
           WORKSPACE_TOKEN: ${{ secrets[env.WORKSPACE_TOKEN] }}
           JOB_ID: ${{ vars[env.JOB_ID] }}
           NOTEBOOK_PARAMS: ${{ env.NOTEBOOK_PARAMS }}
-        run: databricks_workflow_trigger.py
+        run: python databricks_workflow_trigger.py
