@@ -35,7 +35,7 @@ def trigger_job_run_sdk(job_id, params):
         print(f'Triggered a job run with run_id: {run.response.run_id}')
         
         run_res = run.result().as_dict()
-        return {key: run_result.get(key) for key in ['run_id', 'run_page_url', 'state']}
+        return {key: run_res.get(key) for key in ['run_id', 'run_page_url', 'state']}
     except Exception as e:
         raise Exception(f'Failed to trigger workflow run: {e}')
 
