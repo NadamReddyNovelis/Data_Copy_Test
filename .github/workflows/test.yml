@@ -19,4 +19,5 @@ jobs:
       - name: Test_Task
         shell: python
         run: |
-          print('This works!')
+          var = "${{ vars.SAMPLE_VAR }}"
+          print(f'This works - {var}!')
