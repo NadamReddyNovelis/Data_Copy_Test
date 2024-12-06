@@ -113,7 +113,7 @@ jobs:
       
       - name: Prepare Notebook Params
         run: |
-          NOTEBOOK_PARAMS="SYSTEM=${{ env.SYSTEM }}, REGION=${{ env.REGION }}, PLANT=${{ env.PLANT }}, COMMA SEPARATED TABLES LIST=${{ env.TABLES_LIST }}, INGESTION_LAYER=${{ env.INGESTION_LAYER }}, FROM_ENV=${{ env.FROM_ENV }}, TO_ENV=${{ env.TO_ENV }}, OPERATION_TYPE=${{ env.OPERATION_TYPE }}"
+          NOTEBOOK_PARAMS="{ SYSTEM=${{ env.SYSTEM }}, REGION=${{ env.REGION }}, PLANT=${{ env.PLANT }}, COMMA SEPARATED TABLES LIST=${{ env.TABLES_LIST }}, INGESTION_LAYER=${{ env.INGESTION_LAYER }}, FROM_ENV=${{ env.FROM_ENV }}, TO_ENV=${{ env.TO_ENV }}, OPERATION_TYPE=${{ env.OPERATION_TYPE }} }"
           echo "NOTEBOOK_PARAMS=$NOTEBOOK_PARAMS" >> $GITHUB_ENV
           
       - name: Checkout code
