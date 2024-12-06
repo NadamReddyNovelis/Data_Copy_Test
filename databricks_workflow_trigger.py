@@ -21,10 +21,10 @@ try:
         raise Exception(f'{type(params)} - is not valid for notebook params')
 except json.JSONDecodeError as e:
     print(f"Invalid format for a JSON Object: {e}")
-        raise
+    raise
 except Exception as e:
     print(f"Invalid format for notebook params: {e}")
-        raise
+    raise
 
 def trigger_job_run_sdk(job_id, params):
     try:
