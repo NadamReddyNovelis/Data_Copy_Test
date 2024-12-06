@@ -1,8 +1,13 @@
+import os
 from datetime import datetime
 import pytz
 
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service import jobs
+
+workspace_id = os.getenv("WORKSPACE_INSTANCE")
+api_token = os.getenv("WORKSPACE_TOKEN")
+job_id = os.getenv("JOB_ID")
 
 def trigger_job_run_sdk(job_id, params):
     try:
