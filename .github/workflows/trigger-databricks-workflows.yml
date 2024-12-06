@@ -129,11 +129,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref || github.ref }}
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
       
       - name: Install Required Packages
         run: |
@@ -141,9 +136,10 @@ jobs:
           pip install -r requirements.txt
           
       - name: Trigger Databricks Workflow
+        shell: python
         env:
           WORKSPACE_INSTANCE: ${{ secrets[env.WORKSPACE_INSTANCE] }}
           WORKSPACE_TOKEN: ${{ secrets[env.WORKSPACE_TOKEN] }}
           JOB_ID: ${{ vars[env.JOB_ID] }}
           NOTEBOOK_PARAMS: ${{ env.NOTEBOOK_PARAMS }}
-        run: python databricks_workflow_trigger.py
+        run: databricks_workflow_trigger.py
