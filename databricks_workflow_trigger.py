@@ -49,7 +49,7 @@ if __name__ == '__main__':
     run_result = trigger_job_run_sdk(job_id=job_id, params=params)
     
     print(f'Job at: {run_result["run_page_url"]} completed with result state: {run_result["state"]}')
-    if run_result['state'] in ('SUCCESSFUL'):
+    if run_result['state']['result_state'] in ('SUCCESS'):
         pass
     else:
         raise Exception('Job run failed.')
