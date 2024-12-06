@@ -1,4 +1,6 @@
 import os
+import json
+
 from datetime import datetime
 import pytz
 
@@ -10,9 +12,16 @@ api_token = os.getenv("WORKSPACE_TOKEN")
 job_id = os.getenv("JOB_ID")
 params = os.getenv("NOTEBOOK_PARAMS")
 
-print(workspace_id, api_token, job_id, params)
-print('_________________________________________________________________')
-print(type(workspace_id), type(api_token), type(job_id), type(params))
+try:
+    if type(params) == str:
+        params = json.loads(params)
+    elif type(params) == dict:
+        pass
+    else:
+        raise Exception(f'{type(params)} - is not valid for notebook params')
+except json.JSONDecodeError as e, Exception as e:
+    print(f"Invalid format for notebook params: {e}")
+        raise
 
 def trigger_job_run_sdk(job_id, params):
     try:
