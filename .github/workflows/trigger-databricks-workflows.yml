@@ -89,6 +89,7 @@ jobs:
               exit(1)
 
           print(f"Validation passed: {from_env} > {to_env}")
+        shell: python
   
           
   Trigger-Workflow:
