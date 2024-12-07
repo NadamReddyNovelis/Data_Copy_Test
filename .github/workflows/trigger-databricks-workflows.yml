@@ -83,7 +83,7 @@ jobs:
                       to_env_h = idx
                   if from_env_h is not None and to_env_h is not None: break
           if from_env_h is None or to_env_h is None: 
-              print(f'Validation Failed: FROM_ENV - {from_env} and TO_ENV - {to_env} should be among: {env_hierarchy}')
+              print(f'Validation Failed: FROM_ENV - {from_env} and TO_ENV - {to_env} should be among: {[elm for lst in env_hierarchy for elm in lst]}')
               exit(1)
           if from_env_h > to_env_h:
               print('Validation Failed: FROM_ENV - {from_env} cannot be a higher env than TO_ENV - {to_env}')
