@@ -18,9 +18,6 @@ on:
       INGESTION_LAYER:
         description: "Ingestion Layer"
         required: true
-      FROM_ENV:
-        description: "Source Environment"
-        required: true
       TO_ENV:
         description: "Target Environment"
         required: true
@@ -34,7 +31,7 @@ env:
   PLANT: ${{ github.event.inputs.PLANT }}
   TABLES_LIST: ${{ github.event.inputs.TABLES_LIST }}
   INGESTION_LAYER: ${{ github.event.inputs.INGESTION_LAYER }}
-  FROM_ENV: ${{ github.event.inputs.FROM_ENV }}
+  FROM_ENV: DEV
   TO_ENV: ${{ github.event.inputs.TO_ENV }}
   OPERATION_TYPE: ${{ github.event.inputs.OPERATION_TYPE }}
 
@@ -56,14 +53,15 @@ jobs:
 
   Validate-Params:
     needs: Debug-Input-Params
+    environment: Admin
     runs-on: ubuntu-latest
     steps:
       - name: Run Python Script Inline
         shell: python
         run: |
-          from_env = "${{ env.FROM_ENV }}"
-          to_env = "${{ env.TO_ENV }}"
-          op_type = "${{ env.OPERATION_TYPE }}"
+          from_env = "${{ env.FROM_ENV }}".upper()
+          to_env = "${{ env.TO_ENV }}".upper()
+          op_type = "${{ env.OPERATION_TYPE }}".upper()
           
           env_hierarchy = [['PROD'], ['QA', 'PREPROD'], ['DEV', 'SIT']]
           valid_op_types = ['CREATE', 'CLONE']
@@ -93,24 +91,9 @@ jobs:
           
   Trigger-Workflow:
     needs: Validate-Params
-    environment: Data-Copy_OPS
+    environment: Data-Copy_OPS-DEV
     runs-on: ubuntu-latest
     steps:
-      - name: Prepare WORKSPACE-LEVEL Variables
-        id: prepare-env
-        run: |
-          if [[ "${{ env.FROM_ENV }}" == "PROD" ]]; then
-            ENV_GROUP="PROD"
-          elif [[ "${{ env.FROM_ENV }}" == "QA" || "${{ env.FROM_ENV }}" == "PREPROD" ]]; then
-            ENV_GROUP="QA"
-          elif [[ "${{ env.FROM_ENV }}" == "DEV" || "${{ env.FROM_ENV }}" == "SIT" ]]; then
-            ENV_GROUP="DEV"
-          fi
-          
-          echo "WORKSPACE_INSTANCE=${ENV_GROUP}_DATABRICKS_INSTANCE" >> $GITHUB_ENV
-          echo "WORKSPACE_TOKEN=${ENV_GROUP}_DATABRICKS_TOKEN" >> $GITHUB_ENV
-          echo "JOB_ID=${ENV_GROUP}_JOB_ID" >> $GITHUB_ENV
-      
       - name: Prepare Notebook Params
         run: |
           NOTEBOOK_PARAMS="{
@@ -143,8 +126,8 @@ jobs:
           
       - name: Trigger Databricks Workflow
         env:
-          WORKSPACE_INSTANCE: ${{ secrets[env.WORKSPACE_INSTANCE] }}
-          WORKSPACE_TOKEN: ${{ secrets[env.WORKSPACE_TOKEN] }}
-          JOB_ID: ${{ vars[env.JOB_ID] }}
+          WORKSPACE_INSTANCE: ${{ secrets[WORKSPACE_INSTANCE] }}
+          WORKSPACE_TOKEN: ${{ secrets[WORKSPACE_TOKEN] }}
+          JOB_ID: ${{ vars[JOB_ID] }}
           NOTEBOOK_PARAMS: ${{ env.NOTEBOOK_PARAMS }}
         run: python databricks_workflow_trigger.py
