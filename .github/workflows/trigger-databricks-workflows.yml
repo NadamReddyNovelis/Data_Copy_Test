@@ -67,16 +67,14 @@ jobs:
           to_env = "${{ env.TO_ENV }}".upper()
           op_type = "${{ env.OPERATION_TYPE }}".upper()
           
+          validation_flag = True
           env_hierarchy = [['PROD'], ['QA', 'PREPROD'], ['DEV', 'SIT']]
           valid_op_types = ['CREATE', 'CLONE']
 
-          if op_type in valid_op_types:
-              print(f'Validation Passed: OPERATION_TYPE - {op_type}')
-          else:
-              print(f'Validation Failed: OPERATION_TYPE - {op_type}')
-              exit(1)
+          if op_type not in valid_op_types:
+              print(f'Validation FAILED: Invalid OPERATION_TYPE - {op_type}')
+              validation_flag = False
 
-          
           from_env_idx, to_env_idx, branch_idx = None, None, None
           for idx, env_list in enumerate(env_hierarchy):
               for env in env_list:
@@ -90,15 +88,18 @@ jobs:
           if branch_h is not None:
               if branch_idx < from_env_idx:
                   print(f'FROM_ENV - {from_env} cannot be executed in a lower ENV - {git_branch}')
-                  exit(1)
+              validation_flag = False
           if from_env_idx is None or to_env_idx is None: 
               print(f'Validation Failed: FROM_ENV - {from_env} and TO_ENV - {to_env} should be among: {[elm for lst in env_hierarchy for elm in lst]}')
-              exit(1)
+              validation_flag = False
           if from_env_idx > to_env_idx:
               print(f'Validation Failed: FROM_ENV - {from_env} cannot be a higher env than TO_ENV - {to_env}')
-              exit(1)
-          print(f'Validation Passed: FROM_ENV - {from_env} > TO_ENV - {to_env}')
-  
+              validation_flag = False
+
+          if validation_flag:
+              print('--Valid Parameters Passed--')
+          else: print('--Parameter Validation Failed--')
+
           
   Trigger-Workflow:
     needs: Validate-Params
