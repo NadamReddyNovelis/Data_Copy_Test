@@ -126,8 +126,8 @@ jobs:
           
       - name: Trigger Databricks Workflow
         env:
-          WORKSPACE_INSTANCE: ${{ vars[WORKSPACE_INSTANCE] }}
-          WORKSPACE_TOKEN: ${{ secrets[WORKSPACE_TOKEN] }}
-          JOB_ID: ${{ vars[JOB_ID] }}
+          WORKSPACE_INSTANCE: ${{ vars.WORKSPACE_INSTANCE }}
+          WORKSPACE_TOKEN: ${{ secrets.WORKSPACE_TOKEN }}
+          JOB_ID: ${{ vars.JOB_ID }}
           NOTEBOOK_PARAMS: ${{ env.NOTEBOOK_PARAMS }}
         run: python databricks_workflow_trigger.py
