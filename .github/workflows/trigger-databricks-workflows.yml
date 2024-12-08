@@ -85,8 +85,8 @@ jobs:
                   if env == git_branch:
                       branch_idx = idx
                   if from_env_idx is not None and to_env_idx is not None and branch_idx is not None: break
-          if branch_h is not None:
-              if branch_idx < from_env_idx:
+          if branch_idx is not None:
+              if branch_idx > from_env_idx:
                   print(f'FROM_ENV - {from_env} cannot be executed in a lower ENV - {git_branch}')
               validation_flag = False
           if from_env_idx is None or to_env_idx is None: 
