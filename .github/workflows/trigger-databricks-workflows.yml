@@ -108,7 +108,16 @@ jobs:
     steps:
       - name: Prepare Notebook Params
         run: |
-          NOTEBOOK_PARAMS="{\"SYSTEM\": \"${{ env.SYSTEM }}\", \"REGION\": \"${{ env.REGION }}\", \"PLANT\": \"${{ env.PLANT }}\", \"COMMA SEPARATED TABLES LIST\": \"${{ env.TABLES_LIST }}\", \"INGESTION_LAYER\": \"${{ env.INGESTION_LAYER }}\", \"FROM_ENV\": \"${{ env.FROM_ENV }}\", \"TO_ENV\": \"${{ env.TO_ENV }}\", \"OPERATION_TYPE\": \"${{ env.OPERATION_TYPE }}\"}"
+          NOTEBOOK_PARAMS=$(jq -c -n \
+            --arg system "${{ env.SYSTEM }}" \
+            --arg region "${{ env.REGION }}" \
+            --arg plant "${{ env.PLANT }}" \
+            --arg tables_list "${{ env.TABLES_LIST }}" \
+            --arg ingestion_layer "${{ env.INGESTION_LAYER }}" \
+            --arg from_env "${{ env.FROM_ENV }}" \
+            --arg to_env "${{ env.TO_ENV }}" \
+            --arg operation_type "${{ env.OPERATION_TYPE }}" \
+            '{SYSTEM: $system, REGION: $region, PLANT: $plant, "COMMA SEPERATED TABLES LIST": $tables_list, INGESTION_LAYER: $ingestion_layer, FROM_ENV: $from_env, TO_ENV: $to_env, OPERATION_TYPE: $operation_type}')
           echo "$NOTEBOOK_PARAMS"
           echo "NOTEBOOK_PARAMS=$NOTEBOOK_PARAMS" >> $GITHUB_ENV
           
