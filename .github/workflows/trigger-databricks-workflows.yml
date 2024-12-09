@@ -96,45 +96,10 @@ jobs:
     environment: Data-Copy_OPS
     runs-on: ubuntu-latest
     steps:
-      - name: Prepare WORKSPACE-LEVEL Variables
-        id: prepare-env
-        run: |
-          if [[ "${{ env.FROM_ENV }}" == "PROD" ]]; then
-            ENV_GROUP="PROD"
-          elif [[ "${{ env.FROM_ENV }}" == "QA" || "${{ env.FROM_ENV }}" == "PREPROD" ]]; then
-            ENV_GROUP="QA"
-          elif [[ "${{ env.FROM_ENV }}" == "DEV" || "${{ env.FROM_ENV }}" == "SIT" ]]; then
-            ENV_GROUP="DEV"
-          fi
-          
-          echo "WORKSPACE_INSTANCE=${ENV_GROUP}_DATABRICKS_INSTANCE" >> $GITHUB_ENV
-          echo "WORKSPACE_TOKEN=${ENV_GROUP}_DATABRICKS_TOKEN" >> $GITHUB_ENV
-          echo "JOB_ID=${ENV_GROUP}_JOB_ID" >> $GITHUB_ENV
-      
-      - name: Prepare Notebook Params
-        run: |
-          NOTEBOOK_PARAMS="{
-                            \"SYSTEM\": \"${{ env.SYSTEM }}\",
-                            \"REGION\": \"${{ env.REGION }}\",
-                            \"PLANT\": \"${{ env.PLANT }}\",
-                            \"COMMA SEPARATED TABLES LIST\": \"${{ env.TABLES_LIST }}\",
-                            \"INGESTION_LAYER\": \"${{ env.INGESTION_LAYER }}\",
-                            \"FROM_ENV\": \"${{ env.FROM_ENV }}\",
-                            \"TO_ENV\": \"${{ env.TO_ENV }}\",
-                            \"OPERATION_TYPE\": \"${{ env.OPERATION_TYPE }}\"
-                           }"
-          echo "$NOTEBOOK_PARAMS"
-          echo "NOTEBOOK_PARAMS=$NOTEBOOK_PARAMS" >> $GITHUB_ENV
-          
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref || github.ref }}
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
           
       - name: Install Required Packages
         run: |
@@ -143,8 +108,7 @@ jobs:
           
       - name: Trigger Databricks Workflow
         env:
-          WORKSPACE_INSTANCE: ${{ secrets[WORKSPACE_INSTANCE] }}
-          WORKSPACE_TOKEN: ${{ secrets[WORKSPACE_TOKEN] }}
+          DATABRICKS_HOST: ${{ secrets[DATABRICKS_HOST] }}
+          DATABRICKS_TOKEN: ${{ secrets[DATABRICKS_TOKEN] }}
           JOB_ID: ${{ vars[JOB_ID] }}
-          NOTEBOOK_PARAMS: ${{ env.NOTEBOOK_PARAMS }}
-        run: python databricks_workflow_trigger.py
+        run: python databricks_workflow_trigger.py '${{ toJson(inputs) }}'
