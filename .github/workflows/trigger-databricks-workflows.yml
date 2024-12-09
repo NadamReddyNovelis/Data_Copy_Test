@@ -57,6 +57,9 @@ jobs:
   Wait-for-Approval:
     environment: Admin
     runs-on: ubuntu-latest
+    steps:
+    - name: Placeholder Step
+      run: echo "Waiting for Approval"
     
 
   Validate-Params:
