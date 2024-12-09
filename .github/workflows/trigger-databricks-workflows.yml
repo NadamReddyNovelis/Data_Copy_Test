@@ -97,8 +97,8 @@ jobs:
               validation_flag = False
 
           if validation_flag:
-              print('--Valid Parameters Passed--')
-          else: print('--Parameter Validation Failed--')
+              print('--Valid Parameters passed--')
+          else: print('--Invalid Parameters passed--')
 
           
   Trigger-Workflow:
