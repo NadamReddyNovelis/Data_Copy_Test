@@ -54,9 +54,13 @@ jobs:
           echo "OPERATION_TYPE=${{ env.OPERATION_TYPE }}"
 
 
+  Wait-for-Approval:
+    environment: Admin
+    runs-on: ubuntu-latest
+    
+
   Validate-Params:
     needs: Debug-Input-Params
-    environment: Admin
     runs-on: ubuntu-latest
     steps:
       - name: Run Python Script Inline
