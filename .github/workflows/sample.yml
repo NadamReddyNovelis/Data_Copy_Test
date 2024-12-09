@@ -24,7 +24,9 @@ jobs:
           python-version: '3.x'  # Specify your desired Python version
 
       - name: Debug Inputs
-        run: echo "Inputs received: ${{ toJson(inputs) }}"
+        run: |
+          echo 'Input :'
+          echo '${{ toJson(inputs) }}'
 
       - name: Run Python Script
         run: |
