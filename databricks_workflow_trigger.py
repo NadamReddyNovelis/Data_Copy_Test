@@ -10,12 +10,13 @@ def trigger_job_run_sdk(job_id, params):
             job_id=job_id,
             notebook_params=params
         )
-        print(f'Triggered a job run with run_id: {run.response.run_id}')
-        
-        run_res = run.result().as_dict()
-        return {key: run_res.get(key) for key in ['run_id', 'run_page_url', 'state']}
     except Exception as e:
         raise Exception(f'Failed to trigger workflow run: {e}')
+    
+    print(f'Triggered a job run with run_id: {run.response.run_id}')
+    
+    run_res = run.result().as_dict()
+    return {key: run_res.get(key, 'Key-Unavailable') for key in ['run_id', 'run_page_url', 'state']}
 
 
 if __name__ == '__main__':
@@ -46,7 +47,7 @@ if __name__ == '__main__':
         run_result = trigger_job_run_sdk(job_id=job_id, params=params)
     
         print(f'Job at: {run_result["run_page_url"]} completed with result state: {run_result["state"]}')
-        if run_result["state"].get("result_state",run_result["state"].get("life_cycle_state")) not in ('SUCCESS'):
+        if run_result["state"].get("result_state") not in ('SUCCESS'):
             raise Exception('Job Status - FAILED')
     except Exception as e:
         raise Exception(f'Error: {e}')
