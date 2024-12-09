@@ -63,7 +63,9 @@ jobs:
     
 
   Validate-Params:
-    needs: Debug-Input-Params
+    needs: 
+      - Debug-Input-Params
+      - Wait-for-Approval
     runs-on: ubuntu-latest
     steps:
       - name: Run Python Script Inline
