@@ -58,8 +58,8 @@ jobs:
     environment: Admin
     runs-on: ubuntu-latest
     steps:
-    - name: Placeholder Step
-      run: echo "Waiting for Approval"
+    - name: Waiting for Approval
+      run: echo "Waiting for Approval..."
 
 
   Validate-Params:
@@ -71,34 +71,43 @@ jobs:
       - name: Run Python Script Inline
         shell: python
         run: |
-          from_env = "${{ env.FROM_ENV }}"
-          to_env = "${{ env.TO_ENV }}"
-          op_type = "${{ env.OPERATION_TYPE }}"
+          git_branch = "${{ github.head_ref || github.ref }}".split('/')[-1].upper()
+          from_env = "${{ env.FROM_ENV }}".upper()
+          to_env = "${{ env.TO_ENV }}".upper()
+          op_type = "${{ env.OPERATION_TYPE }}".upper()
           
+          validation_flag = True
           env_hierarchy = [['PROD'], ['QA', 'PREPROD'], ['DEV', 'SIT']]
           valid_op_types = ['CREATE', 'CLONE']
-
-          if op_type in valid_op_types:
-              print(f'Validation Passed: OPERATION_TYPE - {op_type}')
-          else:
-              print(f'Validation Failed: OPERATION_TYPE - {op_type}')
-              exit(1)
-          
-          from_env_h, to_env_h = None, None
+          if op_type not in valid_op_types:
+              print(f'Validation FAILED: Invalid OPERATION_TYPE - {op_type}')
+              validation_flag = False
+          from_env_idx, to_env_idx, branch_idx = None, None, None
           for idx, env_list in enumerate(env_hierarchy):
               for env in env_list:
                   if env == from_env:
-                      from_env_h = idx
+                      from_env_idx = idx
                   if env == to_env:
-                      to_env_h = idx
-                  if from_env_h is not None and to_env_h is not None: break
-          if from_env_h is None or to_env_h is None: 
+                      to_env_idx = idx
+                  if env == git_branch:
+                      branch_idx = idx
+                  if from_env_idx is not None and to_env_idx is not None and branch_idx is not None: break
+          if branch_idx is not None:
+              if branch_idx > from_env_idx:
+                  print(f'FROM_ENV - {from_env} cannot be executed in a lower ENV - {git_branch}')
+              validation_flag = False
+          if from_env_idx is None or to_env_idx is None: 
               print(f'Validation Failed: FROM_ENV - {from_env} and TO_ENV - {to_env} should be among: {[elm for lst in env_hierarchy for elm in lst]}')
+              validation_flag = False
+          if from_env_idx > to_env_idx:
+              print(f'Validation Failed: FROM_ENV - {from_env} cannot be a higher env than TO_ENV - {to_env}')
+              validation_flag = False
+          if validation_flag:
+              print('--Valid Parameters passed--')
+          else: print('--Invalid Parameters passed--')
+          else: 
+              print('--Invalid Parameters passed--')
               exit(1)
-          if from_env_h > to_env_h:
-              print('Validation Failed: FROM_ENV - {from_env} cannot be a higher env than TO_ENV - {to_env}')
-              exit(1)
-          print(f'Validation Passed: FROM_ENV - {from_env} > TO_ENV - {to_env}')
   
           
   Trigger-Workflow:
