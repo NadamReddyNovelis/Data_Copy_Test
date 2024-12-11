@@ -104,7 +104,6 @@ jobs:
               validation_flag = False
           if validation_flag:
               print('--Valid Parameters passed--')
-          else: print('--Invalid Parameters passed--')
           else: 
               print('--Invalid Parameters passed--')
               exit(1)
@@ -127,7 +126,7 @@ jobs:
           
       - name: Trigger Databricks Workflow
         env:
-          DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
-          JOB_ID: ${{ vars.JOB_ID }}
+          DATABRICKS_HOST: ${{ vars[DATABRICKS_HOST] }}
+          DATABRICKS_TOKEN: ${{ secrets[DATABRICKS_TOKEN] }}
+          JOB_ID: ${{ vars[JOB_ID] }}
         run: python databricks_workflow_trigger.py '${{ toJson(inputs) }}'
