@@ -112,7 +112,7 @@ jobs:
           
   Trigger-Workflow:
     needs: Validate-Params
-    environment: Data-Copy_OPS
+    environment: Data-Copy_OPS-DEV
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
