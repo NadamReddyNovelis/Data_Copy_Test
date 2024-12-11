@@ -95,14 +95,13 @@ jobs:
           if branch_idx is not None:
               if branch_idx > from_env_idx:
                   print(f'FROM_ENV - {from_env} cannot be executed in a lower ENV - {git_branch}')
-              validation_flag = False
+                  validation_flag = False
           if from_env_idx is None or to_env_idx is None: 
               print(f'Validation Failed: FROM_ENV - {from_env} and TO_ENV - {to_env} should be among: {[elm for lst in env_hierarchy for elm in lst]}')
               validation_flag = False
           if from_env_idx > to_env_idx:
               print(f'Validation Failed: FROM_ENV - {from_env} cannot be a higher env than TO_ENV - {to_env}')
               validation_flag = False
-          print(validation_flag)
           if validation_flag:
               print('--Valid Parameters passed--')
           else: 
