@@ -40,8 +40,10 @@ if __name__ == '__main__':
     try:
         run_result = trigger_job_run_sdk(job_id=job_id, params=params)
     
-        print(f'Job at: {run_result["run_page_url"]} completed with result state: {run_result["state"]}')
+        print(f'Job at: {run_result["run_page_url"]} completed with state: {run_result["state"]}')
+        msg = lambda status: f'Job exited with result state - {run_result["state"].get("result_state")} | Status - {status}'
         if run_result["state"].get("result_state") not in ('SUCCESS'):
-            raise Exception('Job Status - FAILED')
+            raise Exception(msg('FAILED'))
+        else: print(msg('SUCCESS'))
     except Exception as e:
         raise Exception(f'Error: {e}')
