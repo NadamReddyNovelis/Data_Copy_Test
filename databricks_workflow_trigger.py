@@ -1,4 +1,4 @@
-import os
+import os, sys
 import json
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service import jobs
@@ -20,29 +20,23 @@ def trigger_job_run_sdk(job_id, params):
 
 
 if __name__ == '__main__':
-    workspace_id = os.getenv("WORKSPACE_INSTANCE")
-    api_token = os.getenv("WORKSPACE_TOKEN")
     job_id = os.getenv("JOB_ID")
-    params = os.getenv("NOTEBOOK_PARAMS")
+    params = sys.argv[1]
     try:
         if type(params) == str:
             params = json.loads(params)
         elif type(params) == dict:
             pass
         else:
-            raise Exception(f'{type(params)} - is not valid for notebook params')
+            raise Exception(f'{params} of type: {type(params)} - is not valid for notebook params')
     except json.JSONDecodeError as e:
         print(f"Invalid format for a JSON Object: {e}")
         raise
     except Exception as e:
         print(f"Invalid format for notebook params: {e}")
-        raise
+        sys.exit(1)
         
-    base_uri = f'https://adb-{workspace_id}.azuredatabricks.net/'
-    workspace_client = WorkspaceClient(
-        host=base_uri,
-        token=api_token,
-    )
+    workspace_client = WorkspaceClient()
     try:
         run_result = trigger_job_run_sdk(job_id=job_id, params=params)
     
