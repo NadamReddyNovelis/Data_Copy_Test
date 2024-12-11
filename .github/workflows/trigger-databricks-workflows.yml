@@ -127,7 +127,7 @@ jobs:
           
       - name: Trigger Databricks Workflow
         env:
-          DATABRICKS_HOST: ${{ vars[DATABRICKS_HOST] }}
-          DATABRICKS_TOKEN: ${{ secrets[DATABRICKS_TOKEN] }}
-          JOB_ID: ${{ vars[JOB_ID] }}
+          DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+          JOB_ID: ${{ vars.JOB_ID }}
         run: python databricks_workflow_trigger.py '${{ toJson(inputs) }}'
