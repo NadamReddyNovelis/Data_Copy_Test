@@ -12,7 +12,7 @@ on:
       PLANT:
         description: "Plant"
         required: true
-      TABLES_LIST:
+      COMA SEPERATED TABLE LIST:
         description: "Tables List"
         required: true
       INGESTION_LAYER:
@@ -32,7 +32,7 @@ env:
   SYSTEM: ${{ github.event.inputs.SYSTEM }}
   REGION: ${{ github.event.inputs.REGION }}
   PLANT: ${{ github.event.inputs.PLANT }}
-  TABLES_LIST: ${{ github.event.inputs.TABLES_LIST }}
+  TABLES_LIST: ${{ github.event.inputs['COMA SEPERATED TABLE LIST'] }}
   INGESTION_LAYER: ${{ github.event.inputs.INGESTION_LAYER }}
   FROM_ENV: ${{ github.event.inputs.FROM_ENV }}
   TO_ENV: ${{ github.event.inputs.TO_ENV }}
