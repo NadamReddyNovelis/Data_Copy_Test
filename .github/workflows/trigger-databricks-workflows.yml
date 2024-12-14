@@ -86,19 +86,14 @@ jobs:
           git_branch = "${{ github.head_ref || github.ref }}".split('/')[-1].upper()
           from_env = "${{ env.FROM_ENV }}".upper()
           to_env = "${{ env.TO_ENV }}".upper()
-          op_type = "${{ env.OPERATION_TYPE }}".upper()
           
           validation_flag = True
           env_hierarchy = [['PROD'], ['QA', 'PREPROD'], ['DEV', 'SIT']]
-          valid_op_types = ['CREATE', 'CLONE']
           if from_env == to_env:
             if from_env == 'DEV':
               pass
             else:
               print(f'From and To ENV cannot be the same - {from_env} | {to_env}')
-              validation_flag = False
-          if op_type not in valid_op_types:
-              print(f'Validation FAILED: Invalid OPERATION_TYPE - {op_type}')
               validation_flag = False
           from_env_idx, to_env_idx, branch_idx = None, None, None
           for idx, env_list in enumerate(env_hierarchy):
