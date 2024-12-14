@@ -1,38 +1,50 @@
-name: Trigger Job-run for Data-Copy
+name: Data-Copy - Trigger Job-run
 
 on:
   workflow_dispatch:
     inputs:
       REGION:
         description: "Region"
-        required: true
+        required: false
       SYSTEM:
         description: "System"
-        required: true
+        required: false
       PLANT:
         description: "Plant"
-        required: true
-      COMA SEPERATED TABLE LIST:
-        description: "Tables List"
+        required: false
+      COMA SEPARATED TABLE LIST:
+        description: "COMMA SEPARATED TABLE LIST"
         required: true
       INGESTION_LAYER:
         description: "Ingestion Layer"
         required: true
       FROM_ENV:
         description: "Source Environment"
+        type: choice
+        options:
+        - DEV
+        - SIT
         required: true
       TO_ENV:
         description: "Target Environment"
+        type: choice
+        options:
+        - DEV
+        - SIT
         required: true
       OPERATION_TYPE:
-        description: "Operation Type (CLONE, CREATE)"
+        description: "Operation Type"
+        type: choice
+        options:
+        - CLONE
+        - CREATE
         required: true
 
 env:
   SYSTEM: ${{ github.event.inputs.SYSTEM }}
   REGION: ${{ github.event.inputs.REGION }}
   PLANT: ${{ github.event.inputs.PLANT }}
-  TABLES_LIST: ${{ github.event.inputs['COMA SEPERATED TABLE LIST'] }}
+  TABLES_LIST: ${{ github.event.inputs['COMA SEPARATED TABLE LIST'] }}
   INGESTION_LAYER: ${{ github.event.inputs.INGESTION_LAYER }}
   FROM_ENV: ${{ github.event.inputs.FROM_ENV }}
   TO_ENV: ${{ github.event.inputs.TO_ENV }}
@@ -79,6 +91,12 @@ jobs:
           validation_flag = True
           env_hierarchy = [['PROD'], ['QA', 'PREPROD'], ['DEV', 'SIT']]
           valid_op_types = ['CREATE', 'CLONE']
+          if from_env == to_env:
+            if from_env == 'DEV':
+              pass
+            else:
+              print(f'From and To ENV cannot be the same - {from_env} | {to_env}')
+              validation_flag = False
           if op_type not in valid_op_types:
               print(f'Validation FAILED: Invalid OPERATION_TYPE - {op_type}')
               validation_flag = False
@@ -96,9 +114,6 @@ jobs:
               if branch_idx > from_env_idx:
                   print(f'FROM_ENV - {from_env} cannot be executed in a lower ENV - {git_branch}')
                   validation_flag = False
-          if from_env_idx is None or to_env_idx is None: 
-              print(f'Validation Failed: FROM_ENV - {from_env} and TO_ENV - {to_env} should be among: {[elm for lst in env_hierarchy for elm in lst]}')
-              validation_flag = False
           if from_env_idx > to_env_idx:
               print(f'Validation Failed: FROM_ENV - {from_env} cannot be a higher env than TO_ENV - {to_env}')
               validation_flag = False
