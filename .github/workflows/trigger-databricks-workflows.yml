@@ -70,7 +70,7 @@ env:
 
 jobs:
   Debug-Input-Params:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Debug INPUT Params
         run: |
@@ -87,7 +87,7 @@ jobs:
 
   Validate-Params:
     needs: Debug-Input-Params
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Run Python Script Inline
         shell: python
@@ -135,7 +135,7 @@ jobs:
   Trigger-Workflow:
     needs: Validate-Params
     environment: Data_Copy_OPS
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Prepare DATABRICKS Variables
         run: |
