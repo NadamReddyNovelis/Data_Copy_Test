@@ -96,7 +96,7 @@ jobs:
           from_env = "${{ env.FROM_ENV }}".upper()
           to_env = "${{ env.TO_ENV }}".upper()
           op_type = "${{ env.OPERATION_TYPE }}".upper()
-          force_run_flag = "${{ env.FORCE_RUN }}".lower(
+          force_run_flag = "${{ env.FORCE_RUN }}".lower()
           validation_flag = True
           
           if force_run_flag=='true':
