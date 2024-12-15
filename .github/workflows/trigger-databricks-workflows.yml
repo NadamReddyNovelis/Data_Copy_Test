@@ -79,7 +79,7 @@ jobs:
           echo "PLANT=${{ env.PLANT }}"
           echo "TABLES_LIST=${{ env.TABLES_LIST }}"
           echo "INGESTION_LAYER=${{ env.INGESTION_LAYER }}"
-          echo "EXECUTION_ENV"=${{ env.EXECUTION_ENV }}"
+          echo "EXECUTION_ENV=${{ env.EXECUTION_ENV }}"
           echo "FROM_ENV=${{ env.FROM_ENV }}"
           echo "TO_ENV=${{ env.TO_ENV }}"
           echo "OPERATION_TYPE=${{ env.OPERATION_TYPE }}"
@@ -98,7 +98,7 @@ jobs:
           op_type = "${{ env.OPERATION_TYPE }}".upper()
           force_run_flag = "${{ env.FORCE_RUN }}"
           validation_flag = True
-              
+          
           if not force_run_flag:
               env_hierarchy = [['PROD'], ['QA', 'PREPROD'], ['DEV', 'SIT']]
               if from_env == to_env:
