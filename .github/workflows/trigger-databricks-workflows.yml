@@ -139,9 +139,11 @@ jobs:
     steps:
       - name: Prepare DATABRICKS Variables
         run: |
-          echo "DATABRICKS_INSTANCE=${{ env.EXECUTION_ENV }}_DATABRICKS_HOST" >> $GITHUB_ENV
+          echo "DATABRICKS_HOST=${{ env.EXECUTION_ENV }}_DATABRICKS_HOST" >> $GITHUB_ENV
           echo "DATABRICKS_TOKEN=${{ env.EXECUTION_ENV }}_DATABRICKS_TOKEN" >> $GITHUB_ENV
           echo "JOB_ID=${{ env.EXECUTION_ENV }}_JOB_ID" >> $GITHUB_ENV
+
+          
             
       - name: Checkout code
         uses: actions/checkout@v3
