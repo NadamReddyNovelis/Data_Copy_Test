@@ -134,7 +134,7 @@ jobs:
           
   Trigger-Workflow:
     needs: Validate-Params
-    environment: Data_Copy_OPS
+    environment: Data-Copy_OPS
     runs-on: ubuntu-latest
     steps:
       - name: Prepare DATABRICKS Variables
