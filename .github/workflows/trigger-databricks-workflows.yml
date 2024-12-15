@@ -92,7 +92,7 @@ jobs:
       - name: Run Python Script Inline
         shell: python
         run: |
-          git_branch = "${{ github.head_ref || github.ref }}".split('/')[-1].upper()
+          ex_env = "${{ env.EXECUTION_ENV }}".upper()
           from_env = "${{ env.FROM_ENV }}".upper()
           to_env = "${{ env.TO_ENV }}".upper()
           op_type = "${{ env.OPERATION_TYPE }}".upper()
@@ -105,7 +105,7 @@ jobs:
                 if from_env != 'DEV' or op_type == 'CLONE':
                   print(f'From and To ENV cannot be the same - {from_env} | {to_env}')
                   validation_flag = False
-              from_env_idx, to_env_idx, branch_idx = None, None, None
+              from_env_idx, to_env_idx, ex_env_idx = None, None, None
               for idx, env_list in enumerate(env_hierarchy):
                   for env in env_list:
                       if env == from_env:
@@ -113,11 +113,11 @@ jobs:
                       if env == to_env:
                           to_env_idx = idx
                       if env == git_branch:
-                          branch_idx = idx
-                      if from_env_idx is not None and to_env_idx is not None and branch_idx is not None: break
-              if branch_idx is not None:
-                  if branch_idx > from_env_idx:
-                      print(f'FROM_ENV - {from_env} cannot be executed in a lower ENV - {git_branch}')
+                          ex_env_idx = idx
+                      if from_env_idx is not None and to_env_idx is not None and ex_env_idx is not None: break
+              if ex_env_idx is not None:
+                  if ex_env_idx > from_env_idx:
+                      print(f'FROM_ENV - {from_env} cannot be executed in a lower ENV - {ex_env}')
                       validation_flag = False
               if from_env_idx is None or to_env_idx is None: 
                   print(f'Validation Failed: FROM_ENV - {from_env} and TO_ENV - {to_env} should be among: {[elm for lst in env_hierarchy for elm in lst]}')
