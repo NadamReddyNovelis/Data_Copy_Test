@@ -1,7 +1,7 @@
-# name: Trigger Job-run for Data-Copy
+name: Trigger Job-run for Data-Copy
 
-# on:
-#   workflow_dispatch:
+on:
+  workflow_dispatch:
 #     inputs:
 #       REGION:
 #         description: "Region"
