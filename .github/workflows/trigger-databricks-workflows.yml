@@ -112,7 +112,7 @@ jobs:
                           from_env_idx = idx
                       if env == to_env:
                           to_env_idx = idx
-                      if env == git_branch:
+                      if env == ex_env:
                           ex_env_idx = idx
                       if from_env_idx is not None and to_env_idx is not None and ex_env_idx is not None: break
               if ex_env_idx is not None:
