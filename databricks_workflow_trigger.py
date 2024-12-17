@@ -13,7 +13,7 @@ def trigger_job_run_sdk(job_id, params):
     except Exception as e:
         raise Exception(f'Failed to trigger workflow run: {e}')
     
-    print(f'Triggered a job run with run_id: {run.response.run_id}', flush=True)
+    print(f'Triggered a job run for {job_id} with run_id: {run.response.run_id}', flush=True)
     
     run_res = run.result().as_dict()
     return {key: run_res.get(key, 'Key-Unavailable') for key in ['run_id', 'run_page_url', 'state']}
