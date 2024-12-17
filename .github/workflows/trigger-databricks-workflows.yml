@@ -38,7 +38,13 @@ on:
 #   TO_ENV: ${{ github.event.inputs.TO_ENV }}
 #   OPERATION_TYPE: ${{ github.event.inputs.OPERATION_TYPE }}
 
-# jobs:
+jobs:
+  Wait-for-Approval:
+      # environment: Admin
+      runs-on: ubuntu-latest
+      steps:
+      - name: Placeholder Step
+        run: echo "Placeholder Step"
 #   Debug-Input-Params:
 #     runs-on: ubuntu-latest
 #     steps:
