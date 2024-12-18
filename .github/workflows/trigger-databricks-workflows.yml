@@ -160,4 +160,4 @@ jobs:
           DATABRICKS_HOST: ${{ vars[env.DATABRICKS_HOST] }}
           DATABRICKS_TOKEN: ${{ secrets[env.DATABRICKS_TOKEN] }}
           JOB_ID: ${{ vars[env.JOB_ID] }}
-        run: python databricks_workflow_trigger.py '${{ toJson(inputs) }}'
+        run: python src/databricks_workflow_trigger.py '${{ toJson(inputs) }}'
