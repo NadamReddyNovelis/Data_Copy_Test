@@ -55,7 +55,7 @@ env:
 
 jobs:
   Debug-Input-Params:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Debug INPUT Params
         run: |
@@ -71,7 +71,7 @@ jobs:
 
   # Wait-for-Approval:
   #   environment: Admin
-  #   runs-on: self-hosted
+  #   runs-on: ubuntu-latest
   #   steps:
   #   - name: Placeholder Step for Approval
   #     run: echo "Approved to proceed with the workflow"
@@ -80,7 +80,7 @@ jobs:
   Validate-Params:
     # needs: 
     # - Wait-for-Approval
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Run Validation Script Inline
         shell: python
@@ -123,7 +123,7 @@ jobs:
           
   Trigger-Workflow:
     needs: Validate-Params
-    environment: dev
+    environment: Data-Copy_OPS
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
