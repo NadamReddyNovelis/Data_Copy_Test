@@ -3,6 +3,33 @@ name: Data-Copy - Trigger Job-run
 on:
   workflow_dispatch:
     inputs:
+      OPERATION_TYPE:
+        description: "Operation Type"
+        type: choice
+        options:
+        - CLONE
+        - CREATE
+        required: true
+      FROM_ENV:
+        description: "Source Environment"
+        type: choice
+        options:
+        - PROD
+        - QA
+        - PREPROD
+        - DEV
+        - SIT
+        required: true
+      TO_ENV:
+        description: "Target Environment"
+        type: choice
+        options:
+        - DEV
+        - SIT
+        required: true
+      INGESTION_LAYER:
+        description: "Ingestion Layer / Schema"
+        required: true
       REGION:
         description: "Region"
         required: false
@@ -14,30 +41,6 @@ on:
         required: false
       COMA SEPARATED TABLE LIST:
         description: "COMMA SEPARATED TABLE LIST"
-        required: true
-      INGESTION_LAYER:
-        description: "Ingestion Layer"
-        required: true
-      FROM_ENV:
-        description: "Source Environment"
-        type: choice
-        options:
-        - DEV
-        - SIT
-        required: true
-      TO_ENV:
-        description: "Target Environment"
-        type: choice
-        options:
-        - DEV
-        - SIT
-        required: true
-      OPERATION_TYPE:
-        description: "Operation Type"
-        type: choice
-        options:
-        - CLONE
-        - CREATE
         required: true
 
 env:
@@ -52,7 +55,7 @@ env:
 
 jobs:
   Debug-Input-Params:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Debug INPUT Params
         run: |
@@ -66,35 +69,29 @@ jobs:
           echo "OPERATION_TYPE=${{ env.OPERATION_TYPE }}"
 
 
-  Wait-for-Approval:
-    environment: Admin
-    runs-on: ubuntu-latest
-    steps:
-    - name: Placeholder Step for Approval
-      run: echo "Approved to proceed with the workflow"
+  # Wait-for-Approval:
+  #   environment: Admin
+  #   runs-on: self-hosted
+  #   steps:
+  #   - name: Placeholder Step for Approval
+  #     run: echo "Approved to proceed with the workflow"
 
 
   Validate-Params:
-    needs: 
-    - Debug-Input-Params
-    - Wait-for-Approval
-    runs-on: ubuntu-latest
+    # needs: 
+    # - Wait-for-Approval
+    runs-on: self-hosted
     steps:
-      - name: Run Python Script Inline
+      - name: Run Validation Script Inline
         shell: python
         run: |
           git_branch = "${{ github.head_ref || github.ref }}".split('/')[-1].upper()
           from_env = "${{ env.FROM_ENV }}".upper()
           to_env = "${{ env.TO_ENV }}".upper()
+          op_type = "${{ env.OPERATION_TYPE }}".upper()
           
           validation_flag = True
           env_hierarchy = [['PROD'], ['QA', 'PREPROD'], ['DEV', 'SIT']]
-          if from_env == to_env:
-            if from_env == 'DEV':
-              pass
-            else:
-              print(f'From and To ENV cannot be the same - {from_env} | {to_env}')
-              validation_flag = False
           from_env_idx, to_env_idx, branch_idx = None, None, None
           for idx, env_list in enumerate(env_hierarchy):
               for env in env_list:
@@ -106,11 +103,16 @@ jobs:
                       branch_idx = idx
                   if from_env_idx is not None and to_env_idx is not None and branch_idx is not None: break
           if branch_idx is not None:
-              if branch_idx > from_env_idx:
-                  print(f'FROM_ENV - {from_env} cannot be executed in a lower ENV - {git_branch}')
-                  validation_flag = False
+              if op_type == 'CLONE':
+                if branch_idx != from_env_idx:
+                    print(f'FROM_ENV - {from_env} for {op_type} OPERATION cannot be executed in branch - {git_branch}')
+                    validation_flag = False
+              elif op_type == 'CREATE':
+                if branch_idx != to_env_idx:
+                    print(f'to_ENV - {to_env} for {op_type} OPERATION cannot be executed in branch - {git_branch} | SHOULD BE EXECUTED IN {from_env} branch')
+                    validation_flag = False
           if from_env_idx > to_env_idx:
-              print(f'Validation Failed: FROM_ENV - {from_env} cannot be a higher env than TO_ENV - {to_env}')
+              print(f'Validation Failed: FROM_ENV - {from_env} cannot be a higher env than TO_ENV - {to_env} | SHOULD BE EXECUTED IN {to_env} branch')
               validation_flag = False
           if validation_flag:
               print('--Valid Parameters passed--')
@@ -121,14 +123,14 @@ jobs:
           
   Trigger-Workflow:
     needs: Validate-Params
-    environment: Data-Copy_OPS-DEV
+    environment: dev
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref || github.ref }}
-          
+
       - name: Install Required Packages
         run: |
           python -m pip install --upgrade pip
@@ -139,4 +141,4 @@ jobs:
           DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
           JOB_ID: ${{ vars.JOB_ID }}
-        run: python databricks_workflow_trigger.py '${{ toJson(inputs) }}'
+        run: python src/databricks_workflow_trigger.py '${{ toJson(inputs) }}'
