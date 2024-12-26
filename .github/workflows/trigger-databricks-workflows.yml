@@ -24,6 +24,8 @@ on:
         description: "Target Environment"
         type: choice
         options:
+        - QA
+        - PREPROD
         - DEV
         - SIT
         required: true
@@ -105,11 +107,11 @@ jobs:
           if branch_idx is not None:
               if op_type == 'CLONE':
                 if branch_idx != from_env_idx:
-                    print(f'FROM_ENV - {from_env} for {op_type} OPERATION cannot be executed in branch - {git_branch}')
+                    print(f'SOURCE ENV - {from_env} for {op_type} OPERATION cannot be executed in branch - {git_branch} | SHOULD BE EXECUTED IN {to_env} branch')
                     validation_flag = False
               elif op_type == 'CREATE':
                 if branch_idx != to_env_idx:
-                    print(f'to_ENV - {to_env} for {op_type} OPERATION cannot be executed in branch - {git_branch}')
+                    print(f'TARGET ENV - {to_env} for {op_type} OPERATION cannot be executed in branch - {git_branch} | SHOULD BE EXECUTED IN {from_env} branch')
                     validation_flag = False
           if from_env_idx > to_env_idx:
               print(f'Validation Failed: FROM_ENV - {from_env} cannot be a higher env than TO_ENV - {to_env}')
