@@ -3,6 +3,33 @@ name: Data-Copy - Trigger Job-run
 on:
   workflow_dispatch:
     inputs:
+      OPERATION_TYPE:
+        description: "Operation Type"
+        type: choice
+        options:
+        - CLONE
+        - CREATE
+        required: true
+      FROM_ENV:
+        description: "Source Environment"
+        type: choice
+        options:
+        - PROD
+        - QA
+        - PREPROD
+        - DEV
+        - SIT
+        required: true
+      TO_ENV:
+        description: "Target Environment"
+        type: choice
+        options:
+        - DEV
+        - SIT
+        required: true
+      INGESTION_LAYER:
+        description: "Ingestion Layer / Schema"
+        required: true
       REGION:
         description: "Region"
         required: false
@@ -15,46 +42,6 @@ on:
       COMA SEPARATED TABLE LIST:
         description: "COMMA SEPARATED TABLE LIST"
         required: true
-      INGESTION_LAYER:
-        description: "Ingestion Layer"
-        required: true
-      EXECUTION_ENV:
-        description: "Executing DBR Workspace"
-        type: choice
-        options:
-        - PROD
-        - QA
-        - DEV
-      FROM_ENV:
-        description: "Source Environment"
-        type: choice
-        options:
-        - PROD
-        - QA
-        - PREPROD
-        - SIT
-        - DEV
-        required: true
-      TO_ENV:
-        description: "Target Environment"
-        type: choice
-        options:
-        - QA
-        - PREPROD
-        - SIT
-        - DEV
-        required: true
-      OPERATION_TYPE:
-        description: "Operation Type"
-        type: choice
-        options:
-        - CLONE
-        - CREATE
-        required: true
-      FORCE_RUN:
-        description: "Force Run Flag"
-        type: boolean
-        default: False
 
 env:
   SYSTEM: ${{ github.event.inputs.SYSTEM }}
@@ -62,11 +49,9 @@ env:
   PLANT: ${{ github.event.inputs.PLANT }}
   TABLES_LIST: ${{ github.event.inputs['COMA SEPARATED TABLE LIST'] }}
   INGESTION_LAYER: ${{ github.event.inputs.INGESTION_LAYER }}
-  EXECUTION_ENV: ${{ github.event.inputs.EXECUTION_ENV }}
   FROM_ENV: ${{ github.event.inputs.FROM_ENV }}
   TO_ENV: ${{ github.event.inputs.TO_ENV }}
   OPERATION_TYPE: ${{ github.event.inputs.OPERATION_TYPE }}
-  FORCE_RUN: ${{ github.event.inputs.FORCE_RUN }}
 
 jobs:
   Debug-Input-Params:
@@ -79,52 +64,56 @@ jobs:
           echo "PLANT=${{ env.PLANT }}"
           echo "TABLES_LIST=${{ env.TABLES_LIST }}"
           echo "INGESTION_LAYER=${{ env.INGESTION_LAYER }}"
-          echo "EXECUTION_ENV=${{ env.EXECUTION_ENV }}"
           echo "FROM_ENV=${{ env.FROM_ENV }}"
           echo "TO_ENV=${{ env.TO_ENV }}"
           echo "OPERATION_TYPE=${{ env.OPERATION_TYPE }}"
 
 
+  # Wait-for-Approval:
+  #   environment: Admin
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Placeholder Step for Approval
+  #     run: echo "Approved to proceed with the workflow"
+
+
   Validate-Params:
-    needs: Debug-Input-Params
+    # needs: 
+    # - Wait-for-Approval
     runs-on: ubuntu-latest
     steps:
-      - name: Run Python Script Inline
+      - name: Run Validation Script Inline
         shell: python
         run: |
-          ex_env = "${{ env.EXECUTION_ENV }}".upper()
+          git_branch = "${{ github.head_ref || github.ref }}".split('/')[-1].upper()
           from_env = "${{ env.FROM_ENV }}".upper()
           to_env = "${{ env.TO_ENV }}".upper()
           op_type = "${{ env.OPERATION_TYPE }}".upper()
-          force_run_flag = "${{ env.FORCE_RUN }}".lower()
-          validation_flag = True
           
-          if force_run_flag=='true':
-              env_hierarchy = [['PROD'], ['QA', 'PREPROD'], ['DEV', 'SIT']]
-              if from_env == to_env:
-                if from_env != 'DEV' or op_type == 'CLONE':
-                  print(f'From and To ENV cannot be the same - {from_env} | {to_env}')
-                  validation_flag = False
-              from_env_idx, to_env_idx, ex_env_idx = None, None, None
-              for idx, env_list in enumerate(env_hierarchy):
-                  for env in env_list:
-                      if env == from_env:
-                          from_env_idx = idx
-                      if env == to_env:
-                          to_env_idx = idx
-                      if env == ex_env:
-                          ex_env_idx = idx
-                      if from_env_idx is not None and to_env_idx is not None and ex_env_idx is not None: break
-              if ex_env_idx is not None:
-                  if ex_env_idx > from_env_idx:
-                      print(f'FROM_ENV - {from_env} cannot be executed in a lower ENV - {ex_env}')
-                      validation_flag = False
-              if from_env_idx is None or to_env_idx is None: 
-                  print(f'Validation Failed: FROM_ENV - {from_env} and TO_ENV - {to_env} should be among: {[elm for lst in env_hierarchy for elm in lst]}')
-                  validation_flag = False
-              if from_env_idx > to_env_idx:
-                  print(f'Validation Failed: FROM_ENV - {from_env} cannot be a higher env than TO_ENV - {to_env}')
-                  validation_flag = False
+          validation_flag = True
+          env_hierarchy = [['PROD'], ['QA', 'PREPROD'], ['DEV', 'SIT']]
+          from_env_idx, to_env_idx, branch_idx = None, None, None
+          for idx, env_list in enumerate(env_hierarchy):
+              for env in env_list:
+                  if env == from_env:
+                      from_env_idx = idx
+                  if env == to_env:
+                      to_env_idx = idx
+                  if env == git_branch:
+                      branch_idx = idx
+                  if from_env_idx is not None and to_env_idx is not None and branch_idx is not None: break
+          if branch_idx is not None:
+              if op_type == 'CLONE':
+                if branch_idx != from_env_idx:
+                    print(f'FROM_ENV - {from_env} for {op_type} OPERATION cannot be executed in branch - {git_branch}')
+                    validation_flag = False
+              elif op_type == 'CREATE':
+                if branch_idx != to_env_idx:
+                    print(f'to_ENV - {to_env} for {op_type} OPERATION cannot be executed in branch - {git_branch}')
+                    validation_flag = False
+          if from_env_idx > to_env_idx:
+              print(f'Validation Failed: FROM_ENV - {from_env} cannot be a higher env than TO_ENV - {to_env}')
+              validation_flag = False
           if validation_flag:
               print('--Valid Parameters passed--')
           else: 
@@ -137,27 +126,19 @@ jobs:
     environment: Data-Copy_OPS
     runs-on: ubuntu-latest
     steps:
-      - name: Prepare DATABRICKS Variables
-        run: |
-          echo "DATABRICKS_HOST=${{ env.EXECUTION_ENV }}_DATABRICKS_HOST" >> $GITHUB_ENV
-          echo "DATABRICKS_TOKEN=${{ env.EXECUTION_ENV }}_DATABRICKS_TOKEN" >> $GITHUB_ENV
-          echo "JOB_ID=${{ env.EXECUTION_ENV }}_JOB_ID" >> $GITHUB_ENV
-
-          
-            
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref || github.ref }}
-          
+
       - name: Install Required Packages
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      
+          
       - name: Trigger Databricks Workflow
         env:
-          DATABRICKS_HOST: ${{ vars[env.DATABRICKS_HOST] }}
-          DATABRICKS_TOKEN: ${{ secrets[env.DATABRICKS_TOKEN] }}
-          JOB_ID: ${{ vars[env.JOB_ID] }}
+          DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+          JOB_ID: ${{ vars.JOB_ID }}
         run: python src/databricks_workflow_trigger.py '${{ toJson(inputs) }}'
